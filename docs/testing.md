@@ -26,6 +26,8 @@ and startup banner/licence behaviour.
 The simulator stubs upstream framework exports, natives and scheduling. It
 checks nr-core's behaviour; it does not execute upstream frameworks, NUI or a
 real network. See [verification results](verification.md) for checks actually run.
+ESX and QBCore mock exports transport functions as callable tables to represent
+FiveM function references rather than assuming every API member is a Lua function.
 
 ## Required live FXServer checks before publishing
 
@@ -64,7 +66,7 @@ provider versions for each run. Test one primary framework at a time.
 Include source, docs, examples, tests, manifest, licence and changelog. Exclude
 .test-tools, node_modules, editor files and archives. Retain the `nr-core` folder
 name on extraction. On Windows, `./tools/package.ps1` creates a sibling
-`nr-core-1.0.0.zip` with that root folder, including hidden project metadata and
+`nr-core-<version>.zip` with that root folder, including project metadata and
 excluding development dependencies. It refuses to overwrite an existing archive;
 use `-Destination` to choose another output. Run automated and live checks before publishing a GitHub
-release tagged v1.0.0. No remote repository or release is created by the tests.
+release. No remote repository or release is created by the tests.

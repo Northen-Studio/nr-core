@@ -9,6 +9,9 @@ nr-core contains independent adapter code, not copied framework implementations.
   cerulean, script lists, metadata and the standard Lua 5.4 runtime.
 - [FiveM event security](https://docs.fivem.net/docs/developers/server-security/):
   client events check server-origin source; privileged decisions remain server-side.
+- [FiveM Lua function references](https://github.com/citizenfx/fivem/blob/master/data/shared/citizen/scripting/lua/scheduler.lua):
+  exported functions can be transported as callable tables. Framework capability
+  checks accept these references as well as ordinary Lua functions.
 - [QBCore client functions](https://github.com/qbcore-framework/qb-core/blob/main/client/functions.lua):
   GetPlayerData, Notify(text, texttype, length, icon), and the Progressbar wrapper
   mapping to upstream progressbar's Progress callback.

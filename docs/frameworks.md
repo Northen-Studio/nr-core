@@ -7,6 +7,10 @@ events, with no permanent polling. Qbox is examined first, QBCore second, ESX
 independently. Only genuinely `started` resources count. Qbox's virtual
 `qb-core` compatibility export alone does not count as an installed QBCore.
 
+Framework methods may arrive as ordinary Lua functions or FiveM callable function
+references. Both forms are accepted. Missing or non-callable required methods
+block readiness and identify the method in the startup error.
+
 Auto mode with zero candidates uses standalone and warns. With one candidate,
 the relevant API is invoked and validated. With several candidates, initialisation
 fails: stop unintended frameworks or set Config.Framework explicitly. An explicit

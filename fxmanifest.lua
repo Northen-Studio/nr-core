@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Northen Studio'
 description 'A lightweight compatibility layer for Northen Studio resources.'
-version '1.0.0'
+version '1.0.1'
 
 shared_scripts {
     'config/shared.lua',

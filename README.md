@@ -3,7 +3,7 @@
 A lightweight compatibility layer connecting Northen Studio resources with ESX
 Legacy, QBCore, Qbox, custom adapters and standalone FiveM servers.
 Developed by Northen Studio, an independent Polish studio producing free,
-open-source FiveM resources. Version **1.0.0**, licensed under MIT.
+open-source FiveM resources. Version **1.0.1**, licensed under MIT.
 
 ## Features
 

@@ -7,6 +7,25 @@ function NR.started(resource)
     return GetResourceState(resource) == 'started'
 end
 
+function NR.callable(value)
+    if type(value) == 'function' then return true end
+    if type(value) ~= 'table' then return false end
+    local metatable = getmetatable(value)
+    return type(metatable) == 'table' and type(rawget(metatable, '__call')) == 'function'
+end
+
+function NR.checkMethods(object, names, label)
+    if type(object) ~= 'table' then
+        return false, label .. ' API must be a table; received ' .. type(object)
+    end
+    for _, name in ipairs(names) do
+        if not NR.callable(object[name]) then
+            return false, label .. '.' .. name .. ' is not callable; received ' .. type(object[name])
+        end
+    end
+    return true
+end
+
 function NR.text(value, limit)
     if type(value) ~= 'string' then return nil end
     if not utf8.len(value) then return nil end

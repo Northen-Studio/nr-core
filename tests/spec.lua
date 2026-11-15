@@ -11,6 +11,23 @@ end
 
 local Harness = {}
 Harness.__index = Harness
+local function frameworkExport(value)
+    if type(value) == 'function' then
+        return setmetatable({ __cfx_functionReference = 'test-reference' }, {
+            __call = function(_, ...)
+                local result = table.pack(value(...))
+                for i = 1, result.n do result[i] = frameworkExport(result[i]) end
+                return table.unpack(result, 1, result.n)
+            end,
+            __index = function() error('Cannot index a funcref', 2) end,
+            __newindex = function() error('Cannot set indexes on a funcref', 2) end
+        })
+    end
+    if type(value) ~= 'table' then return value end
+    local result = {}
+    for key, entry in pairs(value) do result[key] = frameworkExport(entry) end
+    return result
+end
 function Harness.new(server, states, configure)
     local h = setmetatable({ server = server, states = states or {}, exported = {},
         events = {}, network = {}, timers = {}, now = 0, logs = {}, sent = {},
@@ -90,8 +107,8 @@ function Harness.new(server, states, configure)
         Notify = function(...) record('qbcore', ...) end
     } }
     local resources = {
-        es_extended = { getSharedObject = function() return h.esx end },
-        ['qb-core'] = { GetCoreObject = function() return h.qb end },
+        es_extended = { getSharedObject = function() return frameworkExport(h.esx) end },
+        ['qb-core'] = { GetCoreObject = function() return frameworkExport(h.qb) end },
         qbx_core = {
             GetPlayerData = function() return h.data end,
             GetCoreVersion = function() return '1.0.0' end,
@@ -555,5 +572,67 @@ end)
 test('Invalid custom dependency list blocks readiness', function()
     local h = Harness.new(true, {}, function(c) c.CustomResources = {false} end)
     equal(h.env.NR.ready, false)
+end)
+test('Callable validation accepts Lua functions and funcrefs but rejects plain values', function()
+    local h = Harness.new(false)
+    equal(h.env.NR.callable(function() end), true)
+    equal(h.env.NR.callable(frameworkExport(function() end)), true)
+    for _, value in ipairs({ false, 1, 'function', {}, { __cfx_functionReference = 'forged' } }) do
+        equal(h.env.NR.callable(value), false)
+    end
+    equal(h.env.NR.callable(nil), false)
+    equal(h.env.NR.callable(setmetatable({}, { __metatable = false })), false)
+end)
+for _, server in ipairs({ false, true }) do
+    test('ESX initialises and retrieves players through FiveM funcrefs ' .. tostring(server), function()
+        local h = Harness.new(server, { es_extended = true }, function(c) c.Framework = 'esx' end)
+        equal(h.exported.GetFramework(), 'esx')
+        local core = server and h.resources.es_extended:getSharedObject() or h.env.NR.frameworks.esx.object()
+        local method = server and core.GetPlayerFromId or core.GetPlayerData
+        equal(type(method), 'table')
+        equal(h.env.NR.callable(method), true)
+        local player, reason = h.exported.GetPlayerData(server and 1 or nil)
+        equal(player.identifier, 'esx-char-1'); equal(reason, nil)
+        if server then equal(type(core.GetPlayerFromId(1).getJob), 'table') end
+    end)
+    test('ESX missing API produces a specific diagnostic ' .. tostring(server), function()
+        local method = server and 'GetPlayerFromId' or 'GetPlayerData'
+        local h = Harness.new(server, { es_extended = true }, function(c, fixture)
+            c.Framework = 'esx'; fixture.esx[method] = nil
+        end)
+        equal(h.env.NR.ready, false)
+        assert(table.concat(h.logs, '\n'):find('ESX.' .. method .. ' is not callable; received nil', 1, true))
+        assert(not table.concat(h.logs, '\n'):find('[SUCCESS]', 1, true))
+    end)
+end
+for name, resource in pairs({ esx = 'es_extended', qbcore = 'qb-core' }) do
+    test(name .. ' failed reinitialisation never caches an invalid core object', function()
+        local h = Harness.new(false, { [resource] = true }, function(c) c.Framework = name end)
+        local adapter = h.env.NR.frameworks[name]
+        assert(adapter.object())
+        if name == 'esx' then h.esx = {} else h.qb = { Functions = {} } end
+        equal(adapter.init(), false)
+        equal(adapter.object(), nil)
+    end)
+end
+test('ESX still supports ordinary Lua functions', function()
+    for _, server in ipairs({false, true}) do
+        local h = Harness.new(server, { es_extended = true }, function(c, fixture)
+            c.Framework = 'esx'
+            fixture.resources.es_extended.getSharedObject = function() return fixture.esx end
+        end)
+        equal(h.exported.GetFramework(), 'esx')
+        assert(h.exported.GetPlayerData(server and 1 or nil))
+    end
+end)
+test('ESX restart reacquires callable references', function()
+    local h = Harness.new(false, { es_extended = true }, function(c) c.Framework = 'esx' end)
+    local original = h.env.NR.frameworks.esx.object()
+    h.states.es_extended = nil; h:emit('onClientResourceStop', 'es_extended'); h:pump()
+    equal(h.env.NR.ready, false)
+    h.states.es_extended = true; h:emit('onClientResourceStart', 'es_extended'); h:pump()
+    equal(h.exported.GetFramework(), 'esx')
+    assert(h.env.NR.frameworks.esx.object() ~= original)
+    equal(h.env.NR.callable(h.env.NR.frameworks.esx.object().GetPlayerData), true)
 end)
 print(('RESULT: %d behaviour tests passed'):format(passed))

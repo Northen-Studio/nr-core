@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.1 — 15 November 2026
+
+- Accept FiveM callable function references when validating ESX and QBCore APIs
+  and their notification providers. Previously, valid exported functions could
+  be rejected with `Framework unavailable: esx` or `Framework unavailable: qbcore`.
+- Report the specific missing or invalid framework method on initialisation.
+- Cache framework objects only after successful validation.
+- Simulate FiveM function-reference transport in the regression harness, including
+  exported player methods and resource restart recovery.
+
 ## 1.0.0 — 15 November 2026
 
 Initial Northen Studio Core release implementation.

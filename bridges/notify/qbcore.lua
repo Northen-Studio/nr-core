@@ -3,7 +3,7 @@ NR.notifications.qbcore = {
         if not NR.started('qb-core') then return false end
         if NR.server then return true end
         local core = NR.frameworks.qbcore.object()
-        return core ~= nil and type(core.Functions.Notify) == 'function'
+        return core ~= nil and NR.callable(core.Functions.Notify)
     end,
     send = function(data)
         local core = NR.frameworks.qbcore.object()

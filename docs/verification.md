@@ -6,13 +6,16 @@ Performed on 15 November 2026 in the supplied Windows workspace.
 
 - Compiled **37 Lua files** using Wasmoon's Lua **5.4** runtime, including both
   manifests, all runtime modules, custom adapters, example scripts and tests.
-- Ran **103 behaviour tests**, all passing. The runner executes the actual
+- Ran **112 behaviour tests**, all passing. The runner executes the actual
   manifest and its shared/client/server lists; all referenced files loaded in
   order without missing paths.
 - Tested both client and server exports independently. Verified no server
   network handler is registered and no client-only export is exposed server-side.
 - Tested framework selection, ambiguity, broken/missing required APIs, reference
   invalidation, restart recovery and coalesced lifecycle changes.
+- Reproduced the exported-function validation failure using FiveM-style callable
+  references, then verified ESX and QBCore initialisation, notification calls,
+  player methods, invalid-object cache handling and method-specific diagnostics.
 - Tested all notification types, invalid payloads, missing fields, UTF-8 limits,
   independent providers, fallback, no retry after side effects and targeted
   server delivery with invalid/broadcast IDs rejected.
