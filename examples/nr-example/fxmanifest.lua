@@ -1,0 +1,8 @@
+fx_version 'cerulean'
+game 'gta5'
+author 'Northen Studio'
+description 'ACE-restricted development example for nr-core.'
+version '1.0.0'
+dependency 'nr-core'
+client_script 'client.lua'
+server_script 'server.lua'

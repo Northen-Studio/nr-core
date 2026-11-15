@@ -1,0 +1,1 @@
+exports('GetPlayerData', NR.getPlayer)
