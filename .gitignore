@@ -1,8 +1,0 @@
-.test-tools/
-node_modules/
-*.log
-*.zip
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
